@@ -1,5 +1,5 @@
-from datetime import datetime
-from pydantic import BaseModel, Field
+from datetime import datetime, timezone
+from pydantic import BaseModel, Field, field_validator
 
 
 class BookingCreate(BaseModel):
@@ -11,14 +11,23 @@ class BookingCreate(BaseModel):
     )
     start_time: datetime = Field(
         ...,
-        description="Booking start time",
+        description="Booking start time (timezone-aware, UTC)",
         example="2026-03-01T10:00:00Z",
     )
     end_time: datetime = Field(
         ...,
-        description="Booking end time",
+        description="Booking end time (timezone-aware, UTC)",
         example="2026-03-01T11:00:00Z",
     )
+
+
+    @field_validator("start_time", "end_time")
+    @classmethod
+    def validate_timezone(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
+            raise ValueError("Datetime must be timezone-aware")
+
+        return value.astimezone(timezone.utc)
 
 
 class Booking(BookingCreate):
