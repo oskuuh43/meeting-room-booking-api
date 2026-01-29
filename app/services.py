@@ -33,7 +33,8 @@ class BookingService:
             )
 
     def list_bookings(self, room_id: str):
-        return self.storage.get_bookings_for_room(room_id)
+        bookings = self.storage.get_bookings_for_room(room_id)
+        return sorted(bookings, key=lambda booking: booking.start_time)
 
     # -----------------------
     # Validation helpers
